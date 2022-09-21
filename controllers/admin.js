@@ -6,7 +6,13 @@ const fileHelper = require("../util/file");
 const ITEMS_PER_PAGE = 4;
 
 exports.getAddProduct = (req, res, next) => {
-  let product = { title: "", price: "", description: "", image: { url: "" } };
+  let product = {
+    title: "",
+    price: "",
+    description: "",
+    image: { url: "" },
+    diseases: "",
+  };
   res.render("admin/edit-product", {
     product: product,
     pageTitle: "Add Product",
@@ -14,7 +20,13 @@ exports.getAddProduct = (req, res, next) => {
     editing: false,
     errorMessage: null,
     validationErrors: [],
-    oldInput: { title: "", imageUrl: "", price: "", description: "" },
+    oldInput: {
+      title: "",
+      imageUrl: "",
+      price: "",
+      description: "",
+      diseases: "",
+    },
   });
 };
 
@@ -23,6 +35,7 @@ exports.postAddProduct = (req, res, next) => {
   const image = req.file;
   const price = req.body.price;
   const description = req.body.description;
+  const diseases = req.body.diseases;
 
   if (!image) {
     return res.status(422).render("admin/edit-product", {
@@ -30,13 +43,14 @@ exports.postAddProduct = (req, res, next) => {
         title,
         price,
         description,
+        diseases,
       },
       pageTitle: "Add Product",
       path: "/admin/add-product",
       editing: false,
       errorMessage: "Attached file is not an image",
       validationErrors: [],
-      oldInput: { title, price, description },
+      oldInput: { title, price, description, diseases },
     });
   }
 
@@ -45,6 +59,7 @@ exports.postAddProduct = (req, res, next) => {
     price,
     image,
     description,
+    diseases,
     userId: req.user,
   });
 
@@ -57,7 +72,7 @@ exports.postAddProduct = (req, res, next) => {
       editing: false,
       errorMessage: errors.array()[0].msg,
       validationErrors: errors.array(),
-      oldInput: { title, image, description },
+      oldInput: { title, image, description, diseases },
     });
   }
 
@@ -100,6 +115,7 @@ exports.postEditProduct = (req, res, next) => {
   const price = req.body.price;
   const description = req.body.description;
   const image = req.file;
+  const diseases = req.diseases;
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -108,6 +124,8 @@ exports.postEditProduct = (req, res, next) => {
         title,
         price,
         description,
+        diseases,
+
         _id: prodIdDesigns,
       },
       pageTitle: "Edit Product",
@@ -126,6 +144,7 @@ exports.postEditProduct = (req, res, next) => {
       product.title = title;
       product.price = price;
       product.description = description;
+      product.diseases = diseases;
       if (image) {
         cloudinary.v2.uploader.destroy(product.image.public_id, function(
           error,

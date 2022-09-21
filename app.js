@@ -1,49 +1,60 @@
-const dotenv = require('dotenv');
+const dotenv = require("dotenv");
 dotenv.config();
 
-const path = require('path');
+const path = require("path");
 
-const helmet = require('helmet');
-const multer = require('multer');
+const helmet = require("helmet");
+const multer = require("multer");
 
-const express = require('express');
-const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
-let session = require('express-session');
-const csrf = require('csurf');
-const flash = require('connect-flash');
-const compression = require('compression');
-const morgan = require('morgan');
-const MongoDBStore = require('connect-mongodb-session')(session);
+const express = require("express");
 
-const cloudinary = require('./cloudinaryConfig');
-const cloudinaryStorage = require('multer-storage-cloudinary');
+const mongoose = require("mongoose");
+let session = require("express-session");
+const csrf = require("csurf");
+const flash = require("connect-flash");
+const compression = require("compression");
 
-const User = require('./models/user');
-const errorController = require('./controllers/error');
+const morgan = require("morgan");
+const MongoDBStore = require("connect-mongodb-session")(session);
+
+const cloudinary = require("./cloudinaryConfig");
+const cloudinaryStorage = require("multer-storage-cloudinary");
+const Medicine = require("./routes/medicine");
+
+const User = require("./models/user");
+const errorController = require("./controllers/error");
 
 const { MONGO_DB_URI, PORT } = process.env;
 
 const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "*");
+  res.setHeader("Access-Control-Allow-Headers", "*");
+  next();
+});
 
 app.use(helmet());
 app.use(compression());
-app.use(morgan('combined'));
+app.use(morgan("combined"));
+app.use(Medicine);
 
-app.set('view engine', 'ejs');
-app.set('views', 'views');
+app.set("view engine", "ejs");
+app.set("views", "views");
 
 const csrfProtection = csrf();
 
 const storage = cloudinaryStorage({
-  cloudinary
+  cloudinary,
 });
 
 const fileFilter = (req, file, cb) => {
   if (
-    file.mimetype === 'image/png' ||
-    file.mimetype === 'image/jpg' ||
-    file.mimetype === 'image/jpeg'
+    file.mimetype === "image/png" ||
+    file.mimetype === "image/jpg" ||
+    file.mimetype === "image/jpeg"
   ) {
     cb(null, true);
   } else {
@@ -51,27 +62,28 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const adminRoutes = require('./routes/admin');
-const shopRoutes = require('./routes/shop');
-const authRoutes = require('./routes/auth');
+const adminRoutes = require("./routes/admin");
+const shopRoutes = require("./routes/shop");
+const authRoutes = require("./routes/auth");
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(multer({ storage: storage, fileFilter }).single('image'));
+app.use(multer({ storage: storage, fileFilter }).single("image"));
 
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use(express.static(path.join(__dirname, "public")));
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 app.use(
   session({
-    secret: 'randomstring',
+    secret: "randomstring",
     resave: false,
     saveUninitialized: false,
-    store: new MongoDBStore({ uri: MONGO_DB_URI, collection: 'sessions' })
+    store: new MongoDBStore({ uri: MONGO_DB_URI, collection: "sessions" }),
   })
 );
 
 app.use(csrfProtection);
 app.use(flash());
+
+// parse application/json
 
 app.use((req, res, next) => {
   res.locals.isAuthenticated = req.session.isLoggedIn;
@@ -84,31 +96,31 @@ app.use((req, res, next) => {
     return next();
   }
   User.findById(req.session.user._id)
-    .then(user => {
+    .then((user) => {
       if (!user) {
         return next();
       }
       req.user = user;
       next();
     })
-    .catch(err => {
+    .catch((err) => {
       next(new Error(err));
     });
 });
 
-app.use('/admin', adminRoutes);
+app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 
-app.use('/500', errorController.get500);
+app.use("/500", errorController.get500);
 
 app.use(errorController.get404);
 
 app.use((error, req, res, next) => {
-  res.status(500).render('500', {
-    pageTitle: 'Something went wrong',
-    path: '/500',
-    isAuthenticated: req.session.isLoggedIn
+  res.status(500).render("500", {
+    pageTitle: "Something went wrong",
+    path: "/500",
+    isAuthenticated: req.session.isLoggedIn,
   });
 });
 
@@ -117,4 +129,4 @@ mongoose
   .then(() => {
     app.listen(PORT || 3000);
   })
-  .catch(err => console.log(err));
+  .catch((err) => console.log(err));

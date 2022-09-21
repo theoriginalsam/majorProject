@@ -5,6 +5,7 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET);
 
 const Product = require("../models/product");
 const Order = require("../models/order");
+const { response } = require("express");
 
 const ITEMS_PER_PAGE = 4;
 
@@ -37,6 +38,8 @@ exports.getIndex = (req, res, next) => {
     .catch((err) => console.log(err));
 };
 
+exports.getProductFM = (req, res, next) => {};
+
 exports.getProducts = (req, res, next) => {
   const page = +req.query.page || 1;
   let totalItems;
@@ -62,8 +65,7 @@ exports.getProducts = (req, res, next) => {
         previousPage: page - 1,
         lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
       });
-    })
-    .catch((err) => console.log(err));
+    });
 };
 
 exports.getProduct = (req, res, next) => {
@@ -74,6 +76,8 @@ exports.getProduct = (req, res, next) => {
       pageTitle: product.title,
       path: "/products",
     });
+    console.log(product);
+    res.send(product);
   });
 };
 

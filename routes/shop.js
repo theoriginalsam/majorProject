@@ -1,33 +1,35 @@
-const path = require('path');
+const path = require("path");
 
-const express = require('express');
+const express = require("express");
 
-const isAuth = require('../middleware/is-auth');
+const isAuth = require("../middleware/is-auth");
 
-const shopController = require('../controllers/shop');
+const shopController = require("../controllers/shop");
 
 const router = express.Router();
 
-router.get('/', shopController.getIndex);
+router.get("/", shopController.getIndex);
 
-router.get('/products', shopController.getProducts);
+router.get("/products", shopController.getProducts);
 
-router.get('/products/:productId', shopController.getProduct);
+router.get("/products/:productId", shopController.getProduct);
 
-router.get('/cart', isAuth, shopController.getCart);
+router.post("/getMedicine", shopController.getProductFM);
 
-router.post('/cart', isAuth, shopController.addToCart);
+router.get("/cart", isAuth, shopController.getCart);
 
-router.post('/cart-delete-item', isAuth, shopController.deleteCartItem);
+router.post("/cart", isAuth, shopController.addToCart);
 
-router.get('/checkout/success', isAuth, shopController.getCheckoutSuccess);
+router.post("/cart-delete-item", isAuth, shopController.deleteCartItem);
 
-router.post('/checkout/cancel', isAuth, shopController.getCheckout);
+router.get("/checkout/success", isAuth, shopController.getCheckoutSuccess);
 
-router.get('/orders', isAuth, shopController.getOrders);
+router.post("/checkout/cancel", isAuth, shopController.getCheckout);
 
-router.get('/orders/:orderId', isAuth, shopController.getInvoice);
+router.get("/orders", isAuth, shopController.getOrders);
 
-router.get('/checkout', isAuth, shopController.getCheckout);
+router.get("/orders/:orderId", isAuth, shopController.getInvoice);
+
+router.get("/checkout", isAuth, shopController.getCheckout);
 
 module.exports = router;

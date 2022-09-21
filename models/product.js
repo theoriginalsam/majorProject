@@ -18,6 +18,10 @@ var productSchema = new Schema({
     type: String,
     required: true,
   },
+  diseases: {
+    type: String,
+    required: false,
+  },
   image: {
     public_id: {
       type: String,

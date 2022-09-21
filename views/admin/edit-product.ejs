@@ -27,6 +27,10 @@
                 <label for="description">Description</label>
                 <textarea name="description"  class="<%= validationErrors.find(e => e.param == 'description') ? 'invalid' : '' %>" id="description" rows="5"><% if (editing) { %><%= product.description %><% } else {%><%= oldInput.description %><%}%></textarea>
             </div>
+            <div class="form-control">
+                <label for="diseases">Diseases</label>
+                <input name="diseases"  class="<%= validationErrors.find(e => e.param == 'diseases') ? 'invalid' : '' %>" id="diseases" rows="5"><% if (editing) { %><%= product.diseases %><% } else {%><%= oldInput.diseases %><%}%></textarea>
+            </div>
             <% if (editing) { %>
                 <input type="hidden" value="<%= product._id %>" name="productId">
             <% } %>
